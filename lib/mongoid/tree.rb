@@ -90,8 +90,8 @@ module Mongoid # :nodoc:
       field :parent_ids, :type => Array, :default => []
       index :parent_ids
 
-      set_callback :save, :after, :rearrange_children, :if => :rearrange_children?
-      set_callback :validation, :before do
+      before_save :rearrange_children, :if => :rearrange_children?
+      before_validation do
         run_callbacks(:rearrange) { rearrange }
       end
 
@@ -308,7 +308,20 @@ module Mongoid # :nodoc:
 
     def rearrange_children
       @rearrange_children = false
-      self.children.each { |c| c.save }
+      # self.children.each { |c| c.save }
+      push_parent_ids = self.parent_ids - self.parent_ids_was
+      pull_parent_ids = self.parent_ids_was - self.parent_ids
+      self.collection.update(
+          {parent_ids: self.id}, # all descendants
+          { "$pushAll" => {parent_ids: push_parent_ids} },
+          {multi: true}
+        )
+      self.collection.update(
+          {parent_ids: self.id}, # all descendants
+          { "$pullAll" => {parent_ids: pull_parent_ids} },
+          {multi: true}
+        )
+
     end
 
     def position_in_tree

@@ -87,14 +87,14 @@ describe Mongoid::Tree do
       other_root = node(:other_root); child = node(:child); subchild = node(:subchild);
       other_root.children << child
       subchild.reload # To get the updated version
-      subchild.parent_ids.should == [other_root.id, child.id]
+      subchild.parent_ids.should =~ [other_root.id, child.id]
     end
 
     it "should correctly rebuild its descendants' parent_ids when moved into an other subtree" do
       subchild = node(:subchild); subsubchild = node(:subsubchild); other_child = node(:other_child)
       other_child.children << subchild
       subsubchild.reload
-      subsubchild.parent_ids.should == [node(:other_root).id, other_child.id, subchild.id]
+      subsubchild.parent_ids.should =~ [node(:other_root).id, other_child.id, subchild.id]
     end
 
     it "should rebuild its children's parent_ids when its own parent_id is removed" do
