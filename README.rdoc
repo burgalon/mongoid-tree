@@ -1,6 +1,11 @@
-= mongoid-tree http://travis-ci.org/benedikt/mongoid-tree.png
+= mongoid-tree http://travis-ci.org/burgalon/mongoid-tree.png
 
 A tree structure for Mongoid documents using the materialized path pattern
+
+== Fork Notes
+
+Initially forked from benedik, this fork changes the 'rearrange' function in order to avoid full node traversal when a node is moved.
+Instead we use 'pushAll' 'pullAll' Mongoid atomic updates to keep the ancestry updated. Please note that as a result, the order of the parentIDs does no longer reflect the ancestry order.
 
 == Requirements
 
