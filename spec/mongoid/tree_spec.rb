@@ -379,4 +379,46 @@ describe Mongoid::Tree do
     end
 
   end
+  
+  describe 'race condition' do
+    before(:each) do
+      setup_tree <<-ENDTREE
+        - root:
+          - child:
+            - subchild:
+              - subsubchild
+        - other_root:
+          - other_child
+      ENDTREE
+    end
+
+    it "should not matter if parents have been rearranged" do
+      # two different rails requests load up and change the parent of related nodes
+
+      # move child into other_child
+      c = node(:child)
+      c.parent = node(:other_child)
+
+      # move subchild into root
+      s = node(:subchild)
+      s.parent = node(:root)
+
+      # order of these saves matters:
+      c.save # this results in the parent_ids for s being changed
+      s.save # but this is using the parent_ids from when it was loaded from the db
+
+      s.reload
+      c.reload
+
+      # the nodes that were moved have correct parents
+      c.parent_ids.should =~ [node(:other_child).id, node(:other_root).id]
+      s.parent_ids.should =~ [node(:root).id]
+
+      # mutual children of nodes that were moved
+      ss = node(:subsubchild).reload
+      ss.parent_ids.should_not include(node(:other_root).id, node(:other_child).id)
+      ss.parent_ids.should =~ [node(:subchild).id, node(:root).id]
+    end
+  end
+  
 end

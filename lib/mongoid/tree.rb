@@ -309,8 +309,16 @@ module Mongoid # :nodoc:
     def rearrange_children
       @rearrange_children = false
       # self.children.each { |c| c.save }
-      push_parent_ids = self.parent_ids - self.parent_ids_was
-      pull_parent_ids = self.parent_ids_was - self.parent_ids
+
+      node = self.class.where(_id: id).first
+      if (node)
+        old_parent_ids = node.parent_ids
+      else
+        old_parent_ids = parent_ids_was
+      end
+
+      push_parent_ids = self.parent_ids - old_parent_ids
+      pull_parent_ids = old_parent_ids - self.parent_ids
       self.collection.update(
           {parent_ids: self.id}, # all descendants
           { "$pushAll" => {parent_ids: push_parent_ids} },
