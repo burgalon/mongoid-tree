@@ -414,16 +414,10 @@ describe Mongoid::Tree do
       c.parent_ids.should =~ [node(:other_child).id, node(:other_root).id]
       s.parent_ids.should =~ [node(:root).id]
 
-      # mutual children of nodes that were moved do not...
+      # mutual children of nodes that were moved
       ss = node(:subsubchild).reload
-
-      pending "if there is no race condition" do
-        # incorrect parents coming back
-        ss.parent_ids.should_not include(node(:other_root).id, node(:other_child).id)
-
-        # what it should be
-        ss.parent_ids.should =~ [node(:subchild).id, node(:root).id]
-      end
+      ss.parent_ids.should_not include(node(:other_root).id, node(:other_child).id)
+      ss.parent_ids.should =~ [node(:subchild).id, node(:root).id]
     end
   end
   
