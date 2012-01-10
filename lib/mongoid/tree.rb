@@ -314,7 +314,7 @@ module Mongoid # :nodoc:
       if (node)
         old_parent_ids = node.parent_ids
       else
-        old_parent_ids = parent_ids_was
+        old_parent_ids = parent_ids_was || []
       end
 
       push_parent_ids = self.parent_ids - old_parent_ids
